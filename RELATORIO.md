@@ -6,8 +6,8 @@
 
 ## Dados do aluno
 
-- **Cartão UFRGS**: <mark>`<preencher>`</mark>
-- **Nome**: <mark>`<preencher>`</mark>
+- **Cartão UFRGS**: 588968
+- **Nome**: Renan Müller
 
 ## Passos que eu segui para resolver o problema especificado (em formato de *"prompt"*)
 
@@ -30,15 +30,18 @@
 > - Novamente, lembre-se que você *não pode utilizar ferramentas
 >   de IA para escrever este relatório*
 
-<mark>`<preencher>`</mark>
+1. Posicionar 16 coelhos com seu lado esquerdo virado para o centro na circuferência de um círculo, todos os 16 coelhos devem orbitar o centro;
+2. Adicionar um salto senoidal em 4 fases a cada 4 coelhos;
+3. Adicionar rotação no própro eixo Z para 1 coelho a cada 4;
+4. Implementar dois ovos opostos (180 graus) por coelhos orbitando a barriga.
 
 ## Principais dificuldades encontradas durante o desenvolvimento (formato livre)
 
-<mark>`<preencher>`</mark>
+A principal dificuldade encontrada foi ajustar a distância dos ovos e dos coelhos em suas órbitas.
 
 ## Você acha que conseguiu resolver o problema de forma adequada?
 
-<mark>`<preencher>`</mark>
+Sim, considero que o meu resultado ficou bem semelhante ao original
 
 ## Se você quiser compartilhar mais alguma coisa, coloque aqui:
 

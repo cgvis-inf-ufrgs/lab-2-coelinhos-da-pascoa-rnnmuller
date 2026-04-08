@@ -192,7 +192,7 @@ bool g_MiddleMouseButtonPressed = false; // Análogo para botão do meio do mous
 // renderização.
 float g_CameraTheta = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
 float g_CameraPhi = 0.3f;   // Ângulo em relação ao eixo Y
-float g_CameraDistance = 3.5f; // Distância da câmera para a origem
+float g_CameraDistance = 9.0f; // Distância da câmera para a origem
 
 // Variáveis que controlam rotação do antebraço
 float g_ForearmAngleZ = 0.0f;
@@ -244,7 +244,7 @@ int main(int argc, char* argv[])
     // Criamos uma janela do sistema operacional, com 800 colunas e 600 linhas
     // de pixels, e com título "INF01047 ...".
     GLFWwindow* window;
-    window = glfwCreateWindow(800, 600, "INF01047 - Seu Cartao - Seu Nome", NULL, NULL);
+    window = glfwCreateWindow(800, 600, "INF01047 - 588968 - Renan Muller", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -365,7 +365,8 @@ int main(int argc, char* argv[])
         // Note que, no sistema de coordenadas da câmera, os planos near e far
         // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
         float nearplane = -0.1f;  // Posição do "near plane"
-        float farplane  = -10.0f; // Posição do "far plane"
+        // Ajuste dinâmico para evitar clipping da cena quando a câmera afasta.
+        float farplane  = -std::max(30.0f, g_CameraDistance + 30.0f); // Posição do "far plane"
 
         if (g_UsePerspectiveProjection)
         {
@@ -400,34 +401,78 @@ int main(int argc, char* argv[])
         #define BUNNY  1
         #define PLANE  2
 
-        // Desenhamos o modelo da esfera
-        model = Matrix_Translate(-1.0f,0.0f,0.0f);
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, SPHERE);
-        DrawVirtualObject("the_sphere");
+          // Tempo de animação contínua da cena.
+          const float t = static_cast<float>(glfwGetTime());
+          const float pi = 3.141592f;
 
-        // Desenhamos o modelo do coelho
-        model = Matrix_Translate(1.0f,0.0f,0.0f);
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, BUNNY);
-        DrawVirtualObject("the_bunny");
+                // Grupo de coelhos percorrendo uma trajetória circular ampla.
+                const int bunny_count = 16;
+                const float bunny_orbit_radius = 4.0f;
+                    const float bunny_orbit_speed = 0.45f;
+          for (int i = 0; i < bunny_count; ++i)
+          {
+            const float phase = 2.0f * pi * static_cast<float>(i) / static_cast<float>(bunny_count);
+                        const float angle = -bunny_orbit_speed * t + phase;
+            const float bx = bunny_orbit_radius * cosf(angle);
+            const float bz = bunny_orbit_radius * sinf(angle);
+            float by = -0.15f;
+                        float spin_z = 0.0f;
 
-        // Desenhamos o plano do chão
-        model = Matrix_Translate(0.0f,-1.0f,0.0f) * Matrix_Scale(4.0f,1.0f,4.0f);
+                        // Salto fluido por quartetos: chão, subindo, topo e descendo.
+                        const float jump_frequency = 1.55f;
+                        const float local_phase = -pi/2.0f + (pi/2.0f) * static_cast<float>(i % 4);
+                        const float jump_factor = 0.5f * (sinf(jump_frequency * t + local_phase) + 1.0f);
+                        by += 3.6f * jump_factor; // Aproximadamente 6x a altura visual de um coelho (escala 0.60).
+
+                        // Um coelho por bloco de 4 gira no próprio eixo Y.
+                        if (i % 4 == 0)
+                            spin_z = 2.0f * t;
+
+            model = Matrix_Translate(bx, by, bz)
+                                * Matrix_Rotate_Y(-angle + 3.0f*pi/2.0f)
+                                * Matrix_Rotate_Z(spin_z)
+                * Matrix_Scale(0.60f, 0.60f, 0.60f);
+            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+            glUniform1i(g_object_id_uniform, BUNNY);
+            DrawVirtualObject("the_bunny");
+
+            // Dois ovos orbitando a barriga do coelho.
+            const float belly_height = by - 0.2f;
+            const float egg_orbit_angle = 2.5f * t + phase;
+            const float egg_orbit_radius = 0.65f;
+            const float side_x = -sinf(angle);
+            const float side_z =  cosf(angle);
+            const float orbit_x = side_z;
+            const float orbit_z = -side_x;
+
+            const float egg1_x = bx + orbit_x * (egg_orbit_radius * cosf(egg_orbit_angle));
+            const float egg1_y = belly_height + egg_orbit_radius * sinf(egg_orbit_angle);
+            const float egg1_z = bz + orbit_z * (egg_orbit_radius * cosf(egg_orbit_angle));
+
+            const float egg2_x = bx + orbit_x * (egg_orbit_radius * cosf(egg_orbit_angle + pi));
+            const float egg2_y = belly_height + egg_orbit_radius * sinf(egg_orbit_angle + pi);
+            const float egg2_z = bz + orbit_z * (egg_orbit_radius * cosf(egg_orbit_angle + pi));
+
+            model = Matrix_Translate(egg1_x, egg1_y, egg1_z)
+                * Matrix_Scale(0.13f, 0.20f, 0.13f);
+            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+            glUniform1i(g_object_id_uniform, SPHERE);
+            DrawVirtualObject("the_sphere");
+
+            model = Matrix_Translate(egg2_x, egg2_y, egg2_z)
+                * Matrix_Scale(0.13f, 0.20f, 0.13f);
+            glUniformMatrix4fv(g_model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+            glUniform1i(g_object_id_uniform, SPHERE);
+            DrawVirtualObject("the_sphere");
+          }
+
+        // Desenhamos um chão maior e sem culling para evitar falhas visuais em ângulos extremos.
+        model = Matrix_Translate(0.0f,-1.0f,0.0f) * Matrix_Scale(14.0f,1.0f,14.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, PLANE);
+        glDisable(GL_CULL_FACE);
         DrawVirtualObject("the_plane");
-
-        // Imprimimos na tela os ângulos de Euler que controlam a rotação do
-        // terceiro cubo.
-        TextRendering_ShowEulerAngles(window);
-
-        // Imprimimos na informação sobre a matriz de projeção sendo utilizada.
-        TextRendering_ShowProjection(window);
-
-        // Imprimimos na tela informação sobre o número de quadros renderizados
-        // por segundo (frames per second).
-        TextRendering_ShowFramesPerSecond(window);
+        glEnable(GL_CULL_FACE);
 
         // O framebuffer onde OpenGL executa as operações de renderização não
         // é o mesmo que está sendo mostrado para o usuário, caso contrário

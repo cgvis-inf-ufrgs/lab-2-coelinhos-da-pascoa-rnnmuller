@@ -30,10 +30,10 @@
 > - Novamente, lembre-se que você *não pode utilizar ferramentas
 >   de IA para escrever este relatório*
 
-1. Posicionar 16 coelhos com seu lado esquerdo virado para o centro na circuferência de um círculo, todos os 16 coelhos devem orbitar o centro;
-2. Adicionar um salto senoidal em 4 fases a cada 4 coelhos;
-3. Adicionar rotação no própro eixo Z para 1 coelho a cada 4;
-4. Implementar dois ovos opostos (180 graus) por coelhos orbitando a barriga.
+1. Posicione 16 coelhos com seu lado esquerdo virado para o centro na circuferência de um círculo, todos os 16 coelhos devem orbitar o centro;
+2. Adicione um salto senoidal em 4 fases a cada 4 coelhos;
+3. Adicione rotação no própro eixo Z para 1 coelho a cada 4;
+4. Implemente dois ovos opostos (180 graus) por coelhos orbitando a barriga.
 
 ## Principais dificuldades encontradas durante o desenvolvimento (formato livre)
 
